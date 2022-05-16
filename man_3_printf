@@ -1,8 +1,8 @@
-.TH _PRINTF 3 "October 2020" "0.1" "Holberton School 0x10. C - _printf"
+.TH _PRINTF 3 "16 May 2022" "0.1" "Holberton School 0x10. C - _printf"
 .SH NAME
 .B _printf\fR \- formatted output conversion
 .SH SYNOPSIS
-.B #include \fB"holberton.h"
+.B #include \ALX SE "main.h"
 .B int printf(const char *\fIformat\fB, ...);
 
 
