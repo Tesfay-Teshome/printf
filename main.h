@@ -1,118 +1,208 @@
-#ifndef _PRINTF_H_
-#define _PRINTF_H_
+#ifndef MAIN_H
+#define MAIN_H
+#include <limits.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <unistd.h>
+/* Flag Modifier Macros */
 
-#define BUFF_SIZE 1024
+#define PLUS 1
+
+#define SPACE 2
+
+#define HASH 4
+
+#define ZERO 8
+
+#define NEG 16
+
+#define PLUS_FLAG (flags & 1)
+
+#define SPACE_FLAG ((flags >> 1) & 1)
+
+#define HASH_FLAG ((flags >> 2) & 1)
+
+#define ZERO_FLAG ((flags >> 3) & 1)
+
+#define NEG_FLAG ((flags >> 4) & 1)
+
+
+
+/* Length Modifier Macros */
+
+#define SHORT 1
+
+#define LONG 2
+
+
+
 /**
- * struct type_specifier - contains a type represented as char
- * @f: print_fucntion for specific type
- * @t: character representing type
+ * struct buffer_s - A new type defining a buffer struct.
+ * @buffer: A pointer to a character array.
+ * @start: A pointer to the start of buffer.
+ * @len: The length of the string stored in buffer.
  */
-typedef struct type_specifier
+
+typedef struct buffer_s
+
 {
-	char t;
-	char *(*f)(va_list args, char *mods);
-} spec_t;
+  
+  char *buffer;
+  
+  char *start;
+  
+  unsigned int len;
+  
+} buffer_t;
+
+
+
 /**
- * struct flag_specifier - contains a flag and it's valid specifiers and func
- * @flag: flag represented as character
- * @specs: char pointer to array of valid specifiers for flag
- * @f: get_flag function that returns a char pointer and modifies a char *
+ * struct converter_s - A new type defining a converter struct.
+ * @specifier: A character representing a conversion specifier.
+ * @func: A pointer to a conversion function corresponding to specifier.
  */
-typedef struct flag_specifier
+
+typedef struct converter_s
+
 {
-	char flag;
-	char *specs;
-	char *(*f)(char *);
+  
+  unsigned char specifier;
+  
+  unsigned int (*func)(va_list, buffer_t *,
+		       
+		       unsigned char, int, int, unsigned char);
+  
+} converter_t;
+
+
+
+/**
+ * struct flag_s - A new type defining a flags struct.
+ * @flag: A character representing a flag.
+ * @value: The integer value of the flag.
+ */
+
+typedef struct flag_s
+
+{
+  
+  unsigned char flag;
+  
+  unsigned char value;
+  
 } flag_t;
-/**
- * struct print_helper_s - contains values needed in print helper
- * @format: pointer to format string
- * @f_i: pointer to index of format string
- * @buff: pointer to buffer
- * @c: pointer to character string, used by copy buffer
- * @buff_i: pointer to index of buffer
- * @busy: pointer to printf isbusy
- * @beg_i: pointer to beginning index (where % was found)
- * @buff_len: Counter for the total amount of characters so far.
- * @flags: pointer to int array pertaining to flag's being used
- * @mods: pointer to char array pertaining to modifiers being used (l and h)
- * @width: width pulled from format string
- * @precision: precision pulled from format string
- * @dot: boolean value 0 or 1 representing precision dot found or not
- * @spec_c: Counter for number of non flag characters encountered during busy
- */
-typedef struct print_helper_s
-{
-	/* string  values */
-	const char *format;
-	char *buff;
-	char *c;
-	/* boolean values */
-	char dot;
-	char busy;
-	/* integer values */
-	unsigned int f_i;
-	unsigned int buff_i;
-	unsigned int beg_i;
-	unsigned int buff_len;
-	int width;
-	int precision;
-	int spec_c;
-	/* flags & mods are pointers to arrays of booleans */
-	int *flags;
-	char *mods;
-} printh_t;
+
+
 
 int _printf(const char *format, ...);
-int handle_alpha_percent(printh_t *help_s, va_list args);
-char *create_buff(unsigned int bytes);
-unsigned int copy_buff(char *str, printh_t *help_s);
-unsigned int print_buff(char *buff, unsigned int buff_size);
-void free_all(printh_t *help_s, va_list args);
-void exit_busy_reset(printh_t *help_s, int reset_mods);
-void get_width_precision(printh_t *help_s, va_list args);
-void insert_null_char(printh_t *help_s);
-char *(*get_string_func(char ch))(va_list, char *modifiers);
-char *(*get_flag_func(int flag_index, char spec))(char *);
-char *perform_flag_funcs(int *flags, char *str, char spec);
-char *get_char(va_list, char *mods);
-char *get_string(va_list, char *mods);
-char *get_nonprint_string(va_list, char *mods);
-char *get_percent(va_list, char *mods);
-char *get_int(va_list, char *mods);
-char *get_binary(va_list, char *mods);
-char *get_unsigned(va_list, char *mods);
-char *get_octal(va_list, char *mods);
-char *get_hex(va_list, char *mods);
-char *get_hex_upper(va_list, char *mods);
-char *get_pointer(va_list, char *mods);
-char *get_reverse(va_list, char *mods);
-char *get_rot(va_list, char *mods);
-char *do_plus_flag(char *str);
-char *do_spc_flag(char *str);
-char *do_octal_flag(char *str);
-char *do_hex_flag(char *str);
-char *do_hex_upper_flag(char *str);
-char *do_width(char *str, int width, int space);
-char *do_precision(char *str, int precision, char spec);
-char *get_hex_n(unsigned int);
-char *get_hex_long_n(unsigned long int);
-char *do_shift(char *str, int width);
-int ch_in_array(char c, char *ptr);
-int is_specifier(char c);
-int is_flag(char c, char prev_c);
-int is_modifier(char c);
-int _isalpha(char c);
-int _isdigit(char c);
-int is_printable(char c);
-unsigned int _abs(int n);
-int _strlen(char *s);
-void _string_upper(char *str);
-char *_strcpy(char *dest, char *src);
-int fill_nonprint_buffer(int length, char *buff, char *str);
-int get_numbase_len(unsigned int num, unsigned int base);
-int get_longnumbase_len(unsigned long int num, unsigned int base);
-void fill_numbase_buff(unsigned int, unsigned int, char *b, int size);
-void fill_longnumbase_buff(unsigned long int num, unsigned int, char *, int);
-#endif /* _PRINTF_H_ */
+
+
+
+/* Conversion Specifier Functions */
+
+unsigned int convert_c(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_s(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_di(va_list args, buffer_t *output,
+			
+			unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_percent(va_list args, buffer_t *output,
+			     
+			     unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_b(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_u(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_o(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_x(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_X(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_S(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_p(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_r(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+unsigned int convert_R(va_list args, buffer_t *output,
+		       
+		       unsigned char flags, int wid, int prec, unsigned char len);
+
+
+
+/* Handlers */
+
+unsigned char handle_flags(const char *flags, char *index);
+
+unsigned char handle_length(const char *modifier, char *index);
+
+int handle_width(va_list args, const char *modifier, char *index);
+
+int handle_precision(va_list args, const char *modifier, char *index);
+
+unsigned int (*handle_specifiers(const char *specifier))(va_list, buffer_t *,
+							 
+							 unsigned char, int, int, unsigned char);
+
+
+
+/* Modifiers */
+
+unsigned int print_width(buffer_t *output, unsigned int printed,
+			 
+			 unsigned char flags, int wid);
+
+unsigned int print_string_width(buffer_t *output,
+				
+				unsigned char flags, int wid, int prec, int size);
+
+unsigned int print_neg_width(buffer_t *output, unsigned int printed,
+			     
+			     unsigned char flags, int wid);
+
+
+
+/* Helper Functions */
+
+buffer_t *init_buffer(void);
+
+void free_buffer(buffer_t *output);
+
+unsigned int _memcpy(buffer_t *output, const char *src, unsigned int n);
+
+unsigned int convert_sbase(buffer_t *output, long int num, char *base,
+			   
+			   unsigned char flags, int wid, int prec);
+
+unsigned int convert_ubase(buffer_t *output, unsigned long int num, char *base,
+			   
+			   unsigned char flags, int wid, int prec);
+
+
+
+#endif /* HOLBERTON_H */
