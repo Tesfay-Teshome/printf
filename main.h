@@ -98,9 +98,6 @@ typedef struct flag_s
 int _printf(const char *format, ...);
 
 int run_printf(const char *format, va_list args, buffer_t *output);
-unsigned int(*f)(va_list, buffer_t *,
-unsigned char int, int, unsigned char);
-
 
 /* Conversion Specifier Functions */
 
